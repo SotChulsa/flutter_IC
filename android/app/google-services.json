@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "108723258802",
+    "project_id": "score-cb1bd",
+    "storage_bucket": "score-cb1bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:108723258802:android:48f4603210125a592cd0ab",
+        "android_client_info": {
+          "package_name": "com.example.fluttergame_ic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvP1c85rAThfv6p4Jo7lZapzKjGVwsvks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
