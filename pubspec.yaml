@@ -64,6 +64,7 @@ flutter:
     - assets/images/logo.jpeg
     - assets/images/google.png
     - assets/images/required_asterick.png
+    - assets/images/default_profile.png
   uses-material-design: true
   # The custom fonts section was removed because the font files are not present in the repository.
   # Add the font files to fonts/ and re-enable this section if you want to use Poppins or NotoSans.

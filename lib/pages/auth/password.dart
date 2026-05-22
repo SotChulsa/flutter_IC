@@ -10,36 +10,46 @@ class ForgotPassword extends StatefulWidget {
   State<ForgotPassword> createState() => _ForgotPasswordState();
 }
 
+//Page for users to reset their password by sending a password reset email to their email address,
 class _ForgotPasswordState extends State<ForgotPassword> {
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  //Dispose email controller when the widget is disposed to free up resources
   @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
   }
 
+  //Function to send password reset email to user's email address,
+  //if sending email is successful show success message,
+  //if sending email fails show error message
   Future<void> _sendResetEmail() async {
     final email = _emailController.text.trim();
+    //If email field is empty, show error message and return
     if (email.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Please enter your email')));
       return;
     }
-    //Send password reset email using Firebase Authentication to user's email address
+    //This directly sends password reset email to user's email address
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       //ignore: use_build_context_synchronously, why do i need to this
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset email sent')),
+        const SnackBar(
+          content: Text('Password reset email sent'),
+        ), //If successful
       );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
         //ignore: use_build_context_synchronously, hi im blue_underline, haha, nope i dont exist anymore
         context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? 'An error occurred')));
+      ).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'An error occurred')),
+      ); //If failed
     }
   }
 

@@ -1,8 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttergame_ic/password.dart';
+import 'package:fluttergame_ic/pages/auth/password.dart';
+import 'package:fluttergame_ic/pages/home/home_page.dart';
 import 'register_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -31,19 +34,24 @@ Future<UserCredential?> signInWithGoogle() async {
     // ANDROID / IOS
     final GoogleSignIn googleSignIn = GoogleSignIn.instance;
     await googleSignIn.initialize(
-      clientId:
-          '108723258802-hqieffurfoamcilkajackt5uf66vpfrl.apps.googleusercontent.com',
+      serverClientId:
+          "108723258802-hqieffurfoamcilkajackt5uf66vpfrl.apps.googleusercontent.com",
     );
 
+    // Authenticate user with Google Sign-In
     final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
+    // Get the authentication details from the Google Sign-In process
     final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+    // Create a new credential using the authentication details obtained from Google Sign-In
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
+    //Returns a UserCredential if the sign-in was successful, or null if it failed
     return await FirebaseAuth.instance.signInWithCredential(credential);
+    //error handling, if sign-in fails, print error and return null
   } catch (e) {
-    // ignore: avoid_print, this is for debugging purposes
+    // ignore: avoid_print, this is for debugging purposes and will be removed later
     print("Google Sign-In error: $e");
     return null;
   }
@@ -74,6 +82,7 @@ class decoration {
   );
 }
 
+//class that represents the login page
 class _MyLoginPageState extends State<MyLoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -81,40 +90,21 @@ class _MyLoginPageState extends State<MyLoginPage> {
   //PUT THE FUNCTION HERE
   Future<void> signIn() async {
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-            email: _emailController.text.trim(),
-            password: _passwordController.text.trim(),
-          );
-      // GET USER ROLE
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .get();
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-      String role = doc['role'];
+      if (!context.mounted) return;
 
-      if (role == 'admin') {
-        debugPrint('Logged in as ADMIN');
-        ScaffoldMessenger.of(
-          //ignore: use_build_context_synchronously, this is for showing a snackbar after login
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Logged in as ADMIN')));
-      } else {
-        debugPrint('Logged in as USER');
-        ScaffoldMessenger.of(
-          //ignore: use_build_context_synchronously, this is for showing a snackbar after login
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Logged in as USER')));
-      }
+      //Close login page
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
-        //ignore: use_build_context_synchronously, this is for showing a snackbar after login failure
         context,
       ).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
     } catch (e) {
       ScaffoldMessenger.of(
-        //ignore: use_build_context_synchronously, this is for showing a snackbar after unexpected error
         context,
       ).showSnackBar(const SnackBar(content: Text('Unexpected error')));
     }
@@ -124,9 +114,30 @@ class _MyLoginPageState extends State<MyLoginPage> {
     try {
       //WEB
       if (kIsWeb) {
-        GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        try {
+          // Show loading
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) =>
+                const Center(child: CircularProgressIndicator()),
+          );
 
-        return await FirebaseAuth.instance.signInWithPopup(googleProvider);
+          GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+          // Wait for sign in
+          await FirebaseAuth.instance.signInWithPopup(googleProvider);
+
+          // Close loading dialog
+          Navigator.pop(context);
+        } catch (e) {
+          // Close loading dialog if error happens
+          Navigator.pop(context);
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(e.toString())));
+        }
       }
       //ANDROID/IOS
       final GoogleSignIn googleSignIn = GoogleSignIn.instance;
@@ -395,12 +406,14 @@ class _MyLoginPageState extends State<MyLoginPage> {
                     child: ElevatedButton(
                       onPressed: () async {
                         final userCredential = await signInWithGoogle();
+
                         if (userCredential != null) {
-                          //ignore: avoid_print, this is for debugging purposes and will be removed later
-                          print("Login Success");
+                          if (!context.mounted) return;
+                          Navigator.pop(context);
                         } else {
-                          //ignore: avoid_print, this is for debugging purposes and will be removed later
-                          print("Login Failed");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Login Failed')),
+                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart'
 // ignore: unused_import
 import 'firebase_options_dev.dart'
     if (dart.library.io) 'firebase_options_prod.dart';
+
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
