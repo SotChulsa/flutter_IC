@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -37,17 +39,13 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     //This directly sends password reset email to user's email address
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      //ignore: use_build_context_synchronously, why do i need to this
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Password reset email sent'),
         ), //If successful
       );
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(
-        //ignore: use_build_context_synchronously, hi im blue_underline, haha, nope i dont exist anymore
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message ?? 'An error occurred')),
       ); //If failed
     }

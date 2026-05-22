@@ -1,11 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttergame_ic/pages/auth/password.dart';
-import 'package:fluttergame_ic/pages/home/home_page.dart';
 import 'register_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -44,7 +42,6 @@ Future<UserCredential?> signInWithGoogle() async {
     final GoogleSignInAuthentication googleAuth = googleUser.authentication;
     // Create a new credential using the authentication details obtained from Google Sign-In
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
     //Returns a UserCredential if the sign-in was successful, or null if it failed
@@ -55,10 +52,6 @@ Future<UserCredential?> signInWithGoogle() async {
     print("Google Sign-In error: $e");
     return null;
   }
-}
-
-extension on GoogleSignInAuthentication {
-  String? get accessToken => null;
 }
 
 class RememberMeProvider {
@@ -90,14 +83,40 @@ class _MyLoginPageState extends State<MyLoginPage> {
   //PUT THE FUNCTION HERE
   Future<void> signIn() async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      // Login user
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
+      // Get logged in user
+      final user = userCredential.user;
+      // Create Firestore document if missing
+      if (user != null) {
+        final userDoc = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid);
+        final snapshot = await userDoc.get();
 
+        // the rare chance that if user exists in Authentication
+        // but NOT in Firestore database for some reason, we create a new document for them in Firestore with default values
+        if (!snapshot.exists) {
+          await userDoc.set({
+            'uid': user.uid,
+            'email': user.email,
+            'username': user.email?.split('@')[0] ?? 'User',
+            'role': 'user',
+            'totalScore': 0,
+            'favoriteCategory': '',
+            'quizzesCompleted': 0,
+            'joinedAt': Timestamp.now(),
+          });
+        }
+      }
+
+      //if login is successful, show success message and navigate back to home page
       if (!context.mounted) return;
-
-      //Close login page
+      // Close login page
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
@@ -112,45 +131,35 @@ class _MyLoginPageState extends State<MyLoginPage> {
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      //WEB
+      // WEB LOGIN
       if (kIsWeb) {
-        try {
-          // Show loading
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) =>
-                const Center(child: CircularProgressIndicator()),
-          );
-
-          GoogleAuthProvider googleProvider = GoogleAuthProvider();
-
-          // Wait for sign in
-          await FirebaseAuth.instance.signInWithPopup(googleProvider);
-
-          // Close loading dialog
-          Navigator.pop(context);
-        } catch (e) {
-          // Close loading dialog if error happens
-          Navigator.pop(context);
-
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(e.toString())));
-        }
+        // Create Google provider
+        GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        // Open Google popup and login
+        return await FirebaseAuth.instance.signInWithPopup(googleProvider);
       }
-      //ANDROID/IOS
+      // ANDROID / IOS LOGIN
       final GoogleSignIn googleSignIn = GoogleSignIn.instance;
-      await googleSignIn.initialize();
+      // Initialize Google Sign-In
+      await googleSignIn.initialize(
+        serverClientId:
+            "108723258802-hqieffurfoamcilkajackt5uf66vpfrl.apps.googleusercontent.com",
+      );
+      // Open Google account picker
       final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
+      // Get Google authentication tokens
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      // Create Firebase credential
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
+        // Google ID token
         idToken: googleAuth.idToken,
       );
+      // Login to Firebase with credential
       return await FirebaseAuth.instance.signInWithCredential(credential);
     } catch (e) {
+      // Print error for debugging
       debugPrint("Google Sign-In error: $e");
+      // Return null if login fails
       return null;
     }
   }
@@ -406,14 +415,35 @@ class _MyLoginPageState extends State<MyLoginPage> {
                     child: ElevatedButton(
                       onPressed: () async {
                         final userCredential = await signInWithGoogle();
-
+                        //Check if sign-in was successful
                         if (userCredential != null) {
+                          final user = userCredential.user;
+
+                          //Check if user document exists in Firestore, if not, create a new document with default values,
+                          //this is for users who sign in with Google for the first time,
+                          //since they dont have a document in Firestore yet
+                          if (user != null) {
+                            final userDoc = FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(user.uid);
+
+                            final snapshot = await userDoc.get();
+
+                            if (!snapshot.exists) {
+                              await userDoc.set({
+                                'uid': user.uid,
+                                'email': user.email,
+                                'username': user.displayName ?? 'User',
+                                'role': 'user',
+                                'totalScore': 0,
+                                'favoriteCategory': '',
+                                'quizzesCompleted': 0,
+                                'joinedAt': Timestamp.now(),
+                              });
+                            }
+                          }
                           if (!context.mounted) return;
                           Navigator.pop(context);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Login Failed')),
-                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(

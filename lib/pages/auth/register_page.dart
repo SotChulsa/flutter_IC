@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttergame_ic/pages/home/home_page.dart';
@@ -84,12 +86,10 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
       ).showSnackBar(const SnackBar(content: Text('Registration Successful')));
 
       Navigator.pushReplacement(
-        //ignore: use_build_context_synchronously, this should not cause any issues
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } on FirebaseAuthException catch (e) {
-      // ignore: use_build_context_synchronously, surely this wont cause any issues in the future
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message ?? 'Registration failed')),
       );
