@@ -110,13 +110,17 @@ class _MyLoginPageState extends State<MyLoginPage> {
             'favoriteCategory': '',
             'quizzesCompleted': 0,
             'joinedAt': Timestamp.now(),
+            'isOnline': true,
           });
+        } else {
+          //update online status
+          await userDoc.update({'isOnline': true});
         }
       }
 
       //if login is successful, show success message and navigate back to home page
       if (!context.mounted) return;
-      // Close login page
+      //Close login page
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(

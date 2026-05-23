@@ -1,6 +1,7 @@
 // Profile Page
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../home/home_page.dart';
@@ -18,8 +19,18 @@ class ProfilePage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () async {
+              final user = FirebaseAuth.instance.currentUser;
+              //set user offline
+              if (user != null) {
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid)
+                    .update({'isOnline': false});
+              }
+              // logout
               await FirebaseAuth.instance.signOut();
-              // After signing out, navigate back to home page
+              // navigate back
+              if (!context.mounted) return;
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const HomePage()),

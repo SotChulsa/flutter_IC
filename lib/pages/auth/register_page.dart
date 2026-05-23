@@ -79,6 +79,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
         'quizzesCompleted': 0,
         'joinedAt': Timestamp.now(),
         'role': 'user',
+        'isOnline': true,
       });
 
       ScaffoldMessenger.of(

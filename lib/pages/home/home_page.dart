@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/login_page.dart';
@@ -11,15 +12,12 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home Page'),
-
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 10),
-
             child: SizedBox(
               width: 50,
               height: 50,
-
               child: IconButton(
                 padding: EdgeInsets.zero,
                 onPressed: () {
@@ -57,7 +55,29 @@ class HomePage extends StatelessWidget {
         ],
       ),
 
-      body: const Center(child: Text('Home Page')),
+      body: StreamBuilder(
+        stream: FirebaseFirestore.instance.collection('quizzes').snapshots(),
+
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          }
+          final quizzes = snapshot.data!.docs;
+
+          return ListView.builder(
+            itemCount: quizzes.length,
+
+            itemBuilder: (context, index) {
+              final quiz = quizzes[index];
+
+              return ListTile(
+                title: Text(quiz['title']),
+                subtitle: Text(quiz['category']),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
