@@ -57,19 +57,15 @@ class HomePage extends StatelessWidget {
 
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('quizzes').snapshots(),
-
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
           final quizzes = snapshot.data!.docs;
-
           return ListView.builder(
             itemCount: quizzes.length,
-
             itemBuilder: (context, index) {
               final quiz = quizzes[index];
-
               return ListTile(
                 title: Text(quiz['title']),
                 subtitle: Text(quiz['category']),

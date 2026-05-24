@@ -368,26 +368,20 @@ class QuizManagementCard extends StatelessWidget {
         return ListView.builder(
           //prevents nested scrolling issues
           shrinkWrap: true,
-
           //disables inner scrolling because parent already scrolls
           physics: const NeverScrollableScrollPhysics(),
-
           //total number of quizzes
           itemCount: quizzes.length,
-
           itemBuilder: (context, index) {
             //get current quiz document
             final quiz = quizzes[index];
-
             //each quiz card container
             return Container(
               margin: const EdgeInsets.only(bottom: 18),
               padding: const EdgeInsets.all(18),
-
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
-
                 // shadow effect
                 boxShadow: [
                   BoxShadow(
@@ -400,37 +394,31 @@ class QuizManagementCard extends StatelessWidget {
 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-
                 children: [
                   //quiz title
                   Text(
                     //display title from Firestore
                     //fallback if title missing
                     quiz['title'] ?? 'Untitled Quiz',
-
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 8),
 
                   //quiz category
                   Text(
                     //display category from Firestore
                     quiz['category'],
-
                     style: const TextStyle(color: Colors.grey),
                   ),
-
                   const SizedBox(height: 20),
 
                   //action buttons
                   Row(
                     children: [
                       const SizedBox(width: 12),
-
                       //button for viewwing and edititng/updating
                       Expanded(
                         child: ElevatedButton(
@@ -439,10 +427,12 @@ class QuizManagementCard extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(
                               context,
-
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    CreateQuizPage(quizId: quiz.id),
+                                builder: (context) => CreateQuizPage(
+                                  quizId: quiz.id,
+                                  existingQuiz:
+                                      quiz.data() as Map<String, dynamic>,
+                                ),
                               ),
                             );
                           },
@@ -497,7 +487,6 @@ class CategoryTag extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-
       decoration: BoxDecoration(
         color: Colors.green.withOpacity(0.12),
         borderRadius: BorderRadius.circular(12),
@@ -523,7 +512,6 @@ class PublishedTag extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-
       decoration: BoxDecoration(
         color: Colors.green.withOpacity(0.12),
         borderRadius: BorderRadius.circular(12),
