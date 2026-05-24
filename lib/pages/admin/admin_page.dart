@@ -61,7 +61,6 @@ class AdminPage extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
-
               //admin only stats
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
@@ -72,22 +71,18 @@ class AdminPage extends StatelessWidget {
                   if (userSnapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
-
                   // error
                   if (userSnapshot.hasError) {
                     return Center(child: Text(userSnapshot.error.toString()));
                   }
-
                   // users data
                   final users = userSnapshot.data?.docs ?? [];
                   final totalUsers = users.length;
-
                   //get active users
                   final activeUsers = users.where((user) {
                     final data = user.data() as Map<String, dynamic>;
                     return data['isOnline'] == true;
                   }).length;
-
                   //function to get data from firestone
                   return StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
@@ -99,19 +94,16 @@ class AdminPage extends StatelessWidget {
                           ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-
                       //error
                       if (quizSnapshot.hasError) {
                         return Center(
                           child: Text(quizSnapshot.error.toString()),
                         );
                       }
-
                       //quiz data
                       final quizzes = quizSnapshot.data?.docs ?? [];
                       //total quizzes
                       final totalQuizzes = quizzes.length;
-
                       //total questions
                       int totalQuestions = 0;
                       for (var quiz in quizzes) {
@@ -217,7 +209,6 @@ class AdminPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-
                             child: const Text(
                               'Create Quiz',
                               style: TextStyle(fontWeight: FontWeight.bold),
@@ -226,7 +217,6 @@ class AdminPage extends StatelessWidget {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 20),
                     const QuizManagementCard(),
                   ],
@@ -297,15 +287,12 @@ class AdminStatCard extends StatelessWidget {
           Container(
             //spacing inside icon box
             padding: const EdgeInsets.all(10),
-
             decoration: BoxDecoration(
               //green background
               color: const Color.fromARGB(255, 46, 255, 23),
-
               //rounded icon container
               borderRadius: BorderRadius.circular(14),
             ),
-
             //display passed icon
             child: Icon(icon, color: const Color.fromARGB(255, 0, 0, 0)),
           ),
@@ -313,7 +300,6 @@ class AdminStatCard extends StatelessWidget {
           //value & title
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-
             children: [
               //main state value
               Text(
@@ -441,7 +427,6 @@ class QuizManagementCard extends StatelessWidget {
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
                           ),
-
                           child: const Text('Edit'),
                         ),
                       ),
@@ -458,12 +443,10 @@ class QuizManagementCard extends StatelessWidget {
                                 .doc(quiz.id)
                                 .delete();
                           },
-
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
                           ),
-
                           child: const Text('Delete'),
                         ),
                       ),
@@ -491,7 +474,6 @@ class CategoryTag extends StatelessWidget {
         color: Colors.green.withOpacity(0.12),
         borderRadius: BorderRadius.circular(12),
       ),
-
       child: const Text(
         'Mathematics',
         style: TextStyle(
@@ -516,7 +498,6 @@ class PublishedTag extends StatelessWidget {
         color: Colors.green.withOpacity(0.12),
         borderRadius: BorderRadius.circular(12),
       ),
-
       child: const Text(
         'Published',
         style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600),

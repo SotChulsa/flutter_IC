@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:fluttergame_ic/config/services/quiz_service.dart';
@@ -19,7 +19,14 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
   final TextEditingController optionBController = TextEditingController();
   final TextEditingController optionCController = TextEditingController();
   final TextEditingController optionDController = TextEditingController();
-  final List<String> categories = ['Mathematics', 'Science', 'History'];
+  final List<String> categories = [
+    'Mathematics',
+    'Science',
+    'History',
+    'Biology',
+    'Computer',
+    'English',
+  ];
   String? selectedCategory = 'Mathematics';
   List<Map<String, dynamic>> questions = [
     {
@@ -54,9 +61,9 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
         widget.existingQuiz!['questions'] ?? [],
       );
 
-      // clear default question
+      //clear default question
       questions.clear();
-      // convert firebase data into controllers
+      //convert firebase data into controllers
       for (var question in loadedQuestions) {
         final options = List<String>.from(question['options'] ?? []);
         questions.add({
@@ -179,27 +186,21 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: selectedCategory,
-
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
-
                         prefixIcon: const Icon(
                           Icons.sell_rounded,
                           color: Colors.black,
                         ),
-
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-
                           borderSide: const BorderSide(
                             color: Color(0xFF52DB69),
                           ),
                         ),
-
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-
                           borderSide: const BorderSide(
                             color: Color(0xFF52DB69),
                             width: 2,
@@ -286,7 +287,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
 
                     const SizedBox(height: 24),
 
-                    // dynamic question cards
+                    //dynamic question cards
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -340,12 +341,10 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                                   hintText: 'Enter text here',
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-
                                     borderSide: const BorderSide(
                                       color: Color(0xFF52DB69),
                                     ),
                                   ),
-
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: const BorderSide(
@@ -363,19 +362,16 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                                 'Answer A',
                                 questions[index]['optionAController'],
                               ),
-
                               const SizedBox(height: 14),
                               answerField(
                                 'Answer B',
                                 questions[index]['optionBController'],
                               ),
-
                               const SizedBox(height: 14),
                               answerField(
                                 'Answer C',
                                 questions[index]['optionCController'],
                               ),
-
                               const SizedBox(height: 14),
                               answerField(
                                 'Answer D',
@@ -418,7 +414,6 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                         gradient: const LinearGradient(
                           colors: [Color(0xFF52DB69), Color(0xFF1B910D)],
                         ),
-
                         borderRadius: BorderRadius.circular(14),
                       ),
 
@@ -510,12 +505,10 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
           size: 18,
           color: Colors.grey,
         ),
-
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFF52DB69)),
         ),
-
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFF52DB69), width: 2),
