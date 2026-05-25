@@ -52,7 +52,6 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
         'optionDController': TextEditingController(),
       });
     }
-
     // edit mode
     if (widget.existingQuiz != null) {
       titleController.text = widget.existingQuiz!['title'] ?? '';
@@ -60,7 +59,6 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
       final loadedQuestions = List<Map<String, dynamic>>.from(
         widget.existingQuiz!['questions'] ?? [],
       );
-
       //clear default question
       questions.clear();
       //convert firebase data into controllers
@@ -82,6 +80,20 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
           'optionDController': TextEditingController(
             text: options.length > 3 ? options[3] : '',
           ),
+          'correctAnswer':
+              question['correctAnswer'] ==
+                  (options.isNotEmpty ? options[0] : '')
+              ? 'A'
+              : question['correctAnswer'] ==
+                    (options.length > 1 ? options[1] : '')
+              ? 'B'
+              : question['correctAnswer'] ==
+                    (options.length > 2 ? options[2] : '')
+              ? 'C'
+              : question['correctAnswer'] ==
+                    (options.length > 3 ? options[3] : '')
+              ? 'D'
+              : '',
         });
       }
     }
@@ -113,7 +125,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                 ],
               ),
               const SizedBox(height: 24),
-              // QUIZ INFORMATION CONTAINER
+              //quiz information conatiner
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -169,7 +181,6 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-
                           borderSide: const BorderSide(
                             color: Color(0xFF52DB69),
                             width: 2,
@@ -207,14 +218,12 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                           ),
                         ),
                       ),
-
                       items: categories.map((category) {
                         return DropdownMenuItem(
                           value: category,
                           child: Text(category),
                         );
                       }).toList(),
-
                       onChanged: (value) {
                         setState(() {
                           selectedCategory = value;
@@ -225,9 +234,8 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 28),
-              // QUESTIONS CONTAINER
+              //question container
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -249,42 +257,58 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF52DB69), Color(0xFF1B910D)],
+                        Flexible(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: questions.length >= 10
+                                    ? [Colors.grey, Colors.grey.shade700]
+                                    : [
+                                        const Color(0xFF52DB69),
+                                        const Color(0xFF1B910D),
+                                      ],
+                              ),
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
 
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                questions.add({
-                                  'questionController': TextEditingController(),
-                                  'optionAController': TextEditingController(),
-                                  'optionBController': TextEditingController(),
-                                  'optionCController': TextEditingController(),
-                                  'optionDController': TextEditingController(),
-                                });
-                              });
-                            },
-
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                            child: ElevatedButton(
+                              onPressed: questions.length >= 10
+                                  ? null
+                                  : () {
+                                      setState(() {
+                                        questions.add({
+                                          'questionController':
+                                              TextEditingController(),
+                                          'optionAController':
+                                              TextEditingController(),
+                                          'optionBController':
+                                              TextEditingController(),
+                                          'optionCController':
+                                              TextEditingController(),
+                                          'optionDController':
+                                              TextEditingController(),
+                                        });
+                                      });
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                disabledForegroundColor: Colors.white70,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                questions.length >= 10
+                                    ? 'Limit Reached'
+                                    : '+ Add Question',
                               ),
                             ),
-                            child: const Text('+ Add Question'),
                           ),
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 24),
 
                     //dynamic question cards
@@ -377,6 +401,59 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                                 'Answer D',
                                 questions[index]['optionDController'],
                               ),
+                              const SizedBox(height: 24),
+
+                              const Text(
+                                'Correct Answer*',
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(height: 10),
+
+                              DropdownButtonFormField<String>(
+                                value: questions[index]['correctAnswer'] == ''
+                                    ? null
+                                    : questions[index]['correctAnswer'],
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: Color(0xFF52DB69),
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: Color(0xFF52DB69),
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'A',
+                                    child: Text('Answer A'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'B',
+                                    child: Text('Answer B'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'C',
+                                    child: Text('Answer C'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'D',
+                                    child: Text('Answer D'),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    questions[index]['correctAnswer'] = value;
+                                  });
+                                },
+                              ),
                             ],
                           ),
                         );
@@ -385,9 +462,9 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 28),
-              // BOTTOM BUTTONS
+
+              //bottom buttons
               Row(
                 children: [
                   Expanded(
@@ -428,24 +505,40 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                             return;
                           }
                           //CREATE
-                          List<Map<String, dynamic>> questionsData = questions
-                              .map((question) {
-                                return {
-                                  'questionText': question['questionController']
-                                      .text
-                                      .trim(),
-                                  'options': [
-                                    question['optionAController'].text.trim(),
-                                    question['optionBController'].text.trim(),
-                                    question['optionCController'].text.trim(),
-                                    question['optionDController'].text.trim(),
-                                  ],
-                                  'correctAnswer': question['optionAController']
-                                      .text
-                                      .trim(),
-                                };
-                              })
-                              .toList();
+                          List<Map<String, dynamic>>
+                          questionsData = questions.map((question) {
+                            String correctAnswerText = '';
+                            switch (question['correctAnswer']) {
+                              case 'A':
+                                correctAnswerText =
+                                    question['optionAController'].text.trim();
+                                break;
+                              case 'B':
+                                correctAnswerText =
+                                    question['optionBController'].text.trim();
+                                break;
+                              case 'C':
+                                correctAnswerText =
+                                    question['optionCController'].text.trim();
+                                break;
+                              case 'D':
+                                correctAnswerText =
+                                    question['optionDController'].text.trim();
+                                break;
+                            }
+                            return {
+                              'questionText': question['questionController']
+                                  .text
+                                  .trim(),
+                              'options': [
+                                question['optionAController'].text.trim(),
+                                question['optionBController'].text.trim(),
+                                question['optionCController'].text.trim(),
+                                question['optionDController'].text.trim(),
+                              ],
+                              'correctAnswer': correctAnswerText,
+                            };
+                          }).toList();
 
                           //CREATE
                           if (widget.quizId == null) {

@@ -333,23 +333,19 @@ class QuizManagementCard extends StatelessWidget {
     //whenever quizzes collection changes,
     //UI updates automatically
     return StreamBuilder<QuerySnapshot>(
-      // connect to quizzes collection
+      //connect to quizzes collection
       stream: FirebaseFirestore.instance.collection('quizzes').snapshots(),
-
       builder: (context, snapshot) {
         //show loading spinner while data is loading
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-
         //store all quiz documents from Firestore
         final quizzes = snapshot.data!.docs;
-
-        // show message if no quizzes exist
+        //show message if no quizzes exist
         if (quizzes.isEmpty) {
           return const Center(child: Text('No quizzes found'));
         }
-
         // build scrollable list of quizzes
         return ListView.builder(
           //prevents nested scrolling issues
@@ -377,7 +373,6 @@ class QuizManagementCard extends StatelessWidget {
                   ),
                 ],
               ),
-
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
