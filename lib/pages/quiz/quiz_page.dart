@@ -1,10 +1,13 @@
-// ignore_for_file: use_build_context_synchronously, avoid_print
+// ignore_for_file: unnecessary_non_null_assertion, use_build_context_synchronously, avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttergame_ic/pages/quiz/complete_page.dart';
 
 class QuizPage extends StatefulWidget {
-  const QuizPage({super.key});
+  final String quizId;
+  const QuizPage({super.key, required this.quizId});
 
   @override
   State<QuizPage> createState() => _QuizPageState();
@@ -12,42 +15,44 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   //quiz stats variables
+  final currentUser = FirebaseAuth.instance.currentUser;
   int currentQuestionIndex = 0;
   int? selectedAnswer;
   int score = 0;
   List<int?> userAnswers = [];
+  String category = '';
   List<Map<String, dynamic>> questions = [];
+  List<Map<String, dynamic>> answerBreakdown = [];
   bool isLoading = true;
   //fetching questions from firestone
+  //If the quiz exists, the document data is stored in data, and the quiz category and question list are extracted. If not, function does not load
   Future<void> fetchQuizQuestions() async {
     try {
-      final snapshot = await FirebaseFirestore.instance
+      final doc = await FirebaseFirestore.instance
           .collection('quizzes')
+          .doc(widget.quizId)
           .get();
-      print(snapshot.docs.length);
-      List<Map<String, dynamic>> loadedQuestions = [];
-      //loops through quiz documents
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        //wont show unpublished quizzes
-        if (data['isPublished'] != true) {
-          continue;
-        }
-        final category = data['category'];
-        final quizQuestions = data['questions'] as List;
-        //flatten question arrays
-        for (var q in quizQuestions) {
-          loadedQuestions.add({
-            'question': q['questionText'],
-            'options': q['options'],
-            'correctAnswer': q['correctAnswer'],
-            'category': category,
-          });
-        }
+
+      if (!doc.exists) {
+        setState(() {
+          isLoading = false;
+        });
+        return;
       }
-      //limits a quiz to 10 questions only
+      final data = doc.data()!;
+      final category = data['category'];
+      final quizQuestions = data['questions'] as List;
+      List<Map<String, dynamic>> loadedQuestions = [];
+      for (var q in quizQuestions) {
+        loadedQuestions.add({
+          'question': q['questionText'],
+          'options': q['options'],
+          'correctAnswer': q['correctAnswer'],
+          'category': category,
+        });
+      }
       setState(() {
-        questions = loadedQuestions.take(10).toList();
+        questions = loadedQuestions;
         isLoading = false;
       });
     } catch (e) {
@@ -57,59 +62,123 @@ class _QuizPageState extends State<QuizPage> {
 
   //next questions function
   Future<void> nextQuestion() async {
-    //save answer
+    //save the answer
     userAnswers.add(selectedAnswer);
-    //check answer
-    final selectedOption =
-        questions[currentQuestionIndex]['options'][selectedAnswer];
-    if (selectedOption == questions[currentQuestionIndex]['correctAnswer']) {
-      score++;
-      //last question
-      if (currentQuestionIndex == questions.length - 1) {
-        //get the time finished
-        final endTime = DateTime.now();
-        //calculate duration of a quiz
-        final duration = endTime.difference(startTime);
-        final minutes = duration.inMinutes;
-        final seconds = duration.inSeconds % 60;
-        //save result to firestore
-        await FirebaseFirestore.instance.collection('results').add({
-          'score': score,
-          'totalQuestions': questions.length,
-          'accuracy': (score / questions.length) * 100,
-          'completedAt': Timestamp.now(),
-          'category': questions[0]['category'],
-        });
-        //show the dialog for completion
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('Quiz Completed'),
-              content: Text(
-                'Your Score: $score / ${questions.length}'
-                'Time: ${minutes}m ${seconds}s',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Finish'),
-                ),
-              ],
-            );
-          },
-        );
-        return;
+    answerBreakdown.add({
+      'question': questions[currentQuestionIndex]['question'],
+      'selectedAnswer': selectedAnswer != null
+          ? questions[currentQuestionIndex]['options'][selectedAnswer!]
+          : 'Skipped',
+      'correctAnswer': questions[currentQuestionIndex]['correctAnswer'],
+    });
+    //check for user choose
+    if (selectedAnswer != null) {
+      final selectedOption =
+          questions[currentQuestionIndex]['options'][selectedAnswer!];
+      if (selectedOption == questions[currentQuestionIndex]['correctAnswer']) {
+        score++;
       }
-      //next question
-      setState(() {
-        currentQuestionIndex++;
-        selectedAnswer = null;
-      });
     }
+    //when user reaches the last question
+    if (currentQuestionIndex == questions.length - 1) {
+      final endTime = DateTime.now();
+      final duration = endTime.difference(startTime);
+      final minutes = duration.inMinutes;
+      final seconds = duration.inSeconds % 60;
+      //show result for quiz completion
+      final currentUser = FirebaseAuth.instance.currentUser;
+      String category = questions[0]['category'];
+      await FirebaseFirestore.instance.collection('results').add({
+        'userId': FirebaseAuth.instance.currentUser!.uid,
+        'category': category,
+        'score': score,
+        'totalQuestions': questions.length,
+        'accuracy': (score / questions.length) * 100,
+        'completedAt': Timestamp.now(),
+      });
+      await FirebaseFirestore.instance
+          .collection('quiz_progress')
+          .doc(currentUser!.uid)
+          .delete();
+      //update score for profile page
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid)
+          .get();
+      final data = userDoc.data()!;
+      //previous stats
+      int previousCorrect = data['totalCorrectAnswers'] ?? 0;
+      int previousQuestions = data['totalQuestionsAnswered'] ?? 0;
+      //new totals
+      int newCorrect = previousCorrect + score;
+      int newQuestions = previousQuestions + questions.length;
+      //calculate overall accuracy for all quizzes done
+      double lifetimeAccuracy = (newCorrect / newQuestions) * 100;
+      //daily goals & streak
+      DateTime now = DateTime.now();
+      Timestamp? lastQuizTimestamp = data['lastQuizCompletedDate'];
+      DateTime? lastQuizDate = lastQuizTimestamp?.toDate();
+      int todayCompleted = data['todayCompletedQuizzes'] ?? 0;
+      //chec if its a new day
+      bool isNewDay = true;
+      if (lastQuizDate != null) {
+        isNewDay =
+            lastQuizDate.year != now.year ||
+            lastQuizDate.month != now.month ||
+            lastQuizDate.day != now.day;
+      }
+      //reset daily count
+      if (isNewDay) {
+        todayCompleted = 0;
+      }
+      //increase competed quizzes done for the day
+      todayCompleted++;
+      //update firestone
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid)
+          .update({
+            'quizzesCompleted': FieldValue.increment(1),
+            'totalScore': FieldValue.increment(score),
+            'totalCorrectAnswers': newCorrect,
+            'totalQuestionsAnswered': newQuestions,
+            'accuracyRate': lifetimeAccuracy.round(),
+            'todayCompletedQuizzes': todayCompleted,
+            'lastQuizCompletedDate': Timestamp.now(),
+          });
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          //allow to update completed quiz data at the result page
+          builder: (_) => QuizResultPage(
+            score: score,
+            totalQuestions: questions.length,
+            accuracy: (score / questions.length) * 100,
+            category: questions[0]['category'],
+            quizTitle: 'Quiz',
+            duration: '$minutes:${seconds.toString().padLeft(2, '0')}',
+            answers: answerBreakdown,
+            quizId: widget.quizId,
+          ),
+        ),
+      );
+      return;
+    }
+
+    //next question function
+    await FirebaseFirestore.instance
+        .collection('quiz_progress')
+        .doc(currentUser!.uid)
+        .set({
+          'quizId': widget.quizId,
+          'currentQuestionIndex': currentQuestionIndex + 1,
+          'score': score,
+          'updatedAt': Timestamp.now(),
+        });
+    setState(() {
+      currentQuestionIndex++;
+      selectedAnswer = null;
+    });
   }
 
   late DateTime startTime;
@@ -119,7 +188,29 @@ class _QuizPageState extends State<QuizPage> {
     //start the quiz timer
     startTime = DateTime.now();
     super.initState();
-    fetchQuizQuestions();
+    fetchQuizQuestions().then((_) {
+      loadQuizProgress();
+    });
+  }
+
+  //This function loads a user’s saved quiz progress from Firestore so they can continue a quiz from where they left off.
+  //If no progress document exists, the function stops immediately using return. If progress data exists,
+  //it stores the document data into the data variable and checks whether the saved quizId matches the quiz currently being opened. This will save even when user lougouts
+  Future<void> loadQuizProgress() async {
+    final progressDoc = await FirebaseFirestore.instance
+        .collection('quiz_progress')
+        .doc(currentUser!.uid)
+        .get();
+    if (!progressDoc.exists) return;
+    final data = progressDoc.data()!;
+    if (data['quizId'] == widget.quizId) {
+      setState(() {
+        currentQuestionIndex = data['currentQuestionIndex'] ?? 0;
+        score = data['score'] ?? 0;
+        //reset selected answer
+        selectedAnswer = null;
+      });
+    }
   }
 
   @override
@@ -187,7 +278,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
                 const SizedBox(height: 24),
 
-                //category + progress
+                //Category + Progress
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -212,7 +303,7 @@ class _QuizPageState extends State<QuizPage> {
                   ),
                 ),
                 const SizedBox(height: 28),
-                //question card
+                //Question card
                 Expanded(
                   child: Container(
                     width: double.infinity,
@@ -249,7 +340,8 @@ class _QuizPageState extends State<QuizPage> {
                         ),
                         const SizedBox(height: 24),
 
-                        //answer options
+                        //Dynamically generates quiz answer options and updates
+                        //the selected answer when the user taps an option
                         ...List.generate(question['options'].length, (index) {
                           final option = question['options'][index];
                           final isSelected = selectedAnswer == index;
@@ -308,27 +400,63 @@ class _QuizPageState extends State<QuizPage> {
                           );
                         }),
                         const Spacer(),
+                        Row(
+                          children: [
+                            //skip button
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  // Skip question
+                                  nextQuestion();
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
 
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 18),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                  side: const BorderSide(
+                                    color: Colors.green,
+                                    width: 2,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Skip',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ),
-                            onPressed: selectedAnswer == null
-                                ? null
-                                : nextQuestion,
-                            child: Text(
-                              currentQuestionIndex == questions.length - 1
-                                  ? 'Finish Quiz'
-                                  : 'Next Question',
+                            const SizedBox(width: 12),
+
+                            //Next button
+                            Expanded(
+                              flex: 2,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                onPressed: nextQuestion,
+                                child: Text(
+                                  //Will move to the next question when there is less than 10 questions, when user reaches the 10th question, change to finish quiz
+                                  currentQuestionIndex == questions.length - 1
+                                      ? 'Finish Quiz'
+                                      : 'Next Question',
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),

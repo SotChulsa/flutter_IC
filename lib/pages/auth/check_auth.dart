@@ -10,9 +10,7 @@ class AuthService {
     final userDoc = FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid);
-
     final snapshot = await userDoc.get();
-
     if (!snapshot.exists) {
       await userDoc.set({
         'uid': user.uid,
@@ -39,8 +37,7 @@ class AuthGate extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-
-        // Not logged in
+        //Not logged in
         if (!authSnapshot.hasData) {
           return const HomePage();
         }
@@ -52,35 +49,34 @@ class AuthGate extends StatelessWidget {
               .collection('users')
               .doc(user.uid)
               .get(),
-
           builder: (context, userSnapshot) {
-            // FIRESTORE LOADING
+            //loading
             if (userSnapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            // FIRESTORE ERROR
+            //error
             if (userSnapshot.hasError) {
               return const Scaffold(
                 body: Center(child: Text('Error loading user')),
               );
             }
-            // NO USER DOCUMENT
+            //no user
             if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
               return const Scaffold(
                 body: Center(child: Text('User document not found')),
               );
             }
-            // GET USER DATA
+            //fetch user data
             final userData = userSnapshot.data!.data() as Map<String, dynamic>;
-            // GET ROLE
+            //get roles
             final role = userData['role'].toString().toLowerCase();
-            // ADMIN
+            //for admin
             if (role == 'admin') {
               return const AdminPage();
             }
-            // NORMAL USER
+            //for normal users
             return const HomePage();
           },
         );

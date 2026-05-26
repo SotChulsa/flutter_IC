@@ -27,11 +27,15 @@ class QuizService {
     required String updatedTitle,
     required String updatedCategory,
     required List<Map<String, dynamic>> updatedQuestions,
+    required bool isPublished,
   }) async {
     await FirebaseFirestore.instance.collection('quizzes').doc(quizId).update({
       'title': updatedTitle,
       'category': updatedCategory,
       'questions': updatedQuestions,
+
+      'isPublished': isPublished,
+      'isDraft': !isPublished,
     });
   }
 

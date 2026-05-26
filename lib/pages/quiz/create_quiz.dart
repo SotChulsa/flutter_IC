@@ -41,8 +41,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
   @override
   void initState() {
     super.initState();
-
-    // default first empty question
+    //Default first empty question
     if (questions.isEmpty) {
       questions.add({
         'questionController': TextEditingController(),
@@ -52,16 +51,16 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
         'optionDController': TextEditingController(),
       });
     }
-    // edit mode
+    //Edit mode
     if (widget.existingQuiz != null) {
       titleController.text = widget.existingQuiz!['title'] ?? '';
       selectedCategory = widget.existingQuiz!['category'] ?? 'Mathematics';
       final loadedQuestions = List<Map<String, dynamic>>.from(
         widget.existingQuiz!['questions'] ?? [],
       );
-      //clear default question
+      //Clear default question
       questions.clear();
-      //convert firebase data into controllers
+      //Convert firebase data into controllers
       for (var question in loadedQuestions) {
         final options = List<String>.from(question['options'] ?? []);
         questions.add({
@@ -109,7 +108,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // BACK BUTTON
+              //Back Button
               Row(
                 children: [
                   IconButton(
@@ -125,7 +124,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                 ],
               ),
               const SizedBox(height: 24),
-              //quiz information conatiner
+              //Quiz information conatiner
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -144,7 +143,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    // QUIZ TITLE
+                    //Quiz Title
                     const Text(
                       'Quiz Title*',
                       style: TextStyle(fontWeight: FontWeight.w600),
@@ -189,7 +188,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // CATEGORY
+                    //Category
                     const Text(
                       'Category*',
                       style: TextStyle(fontWeight: FontWeight.w600),
@@ -235,7 +234,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                 ),
               ),
               const SizedBox(height: 28),
-              //question container
+              //Question container
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -246,7 +245,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // top row
+                    //Top row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -270,9 +269,9 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                               ),
                               borderRadius: BorderRadius.circular(14),
                             ),
-
                             child: ElevatedButton(
                               onPressed: questions.length >= 10
+                                  //Adds a new question card when we press the button
                                   ? null
                                   : () {
                                       setState(() {
@@ -311,7 +310,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                     ),
                     const SizedBox(height: 24),
 
-                    //dynamic question cards
+                    //Dynamic question cards
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -327,7 +326,6 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                               width: 2,
                             ),
                           ),
-
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -342,7 +340,6 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-
                                   IconButton(
                                     onPressed: () {
                                       setState(() {
@@ -353,8 +350,8 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                                   ),
                                 ],
                               ),
-
                               const SizedBox(height: 24),
+
                               const Text('Question Text*'),
                               const SizedBox(height: 10),
 
@@ -378,7 +375,6 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                                   ),
                                 ),
                               ),
-
                               const SizedBox(height: 24),
                               const Text('Answer Options*'),
                               const SizedBox(height: 16),
@@ -464,12 +460,61 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
               ),
               const SizedBox(height: 28),
 
-              //bottom buttons
+              //Bottom buttons
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        //Converts all quiz form inputs into a structured list of questions,
+                        //including question text, answer options, and the correct answer
+                        List<Map<String, dynamic>> questionsData = questions
+                            .map((question) {
+                              String correctAnswerText = '';
+                              switch (question['correctAnswer']) {
+                                case 'A':
+                                  correctAnswerText =
+                                      question['optionAController'].text.trim();
+                                  break;
+                                case 'B':
+                                  correctAnswerText =
+                                      question['optionBController'].text.trim();
+                                  break;
+                                case 'C':
+                                  correctAnswerText =
+                                      question['optionCController'].text.trim();
+                                  break;
+                                case 'D':
+                                  correctAnswerText =
+                                      question['optionDController'].text.trim();
+                                  break;
+                              }
+                              return {
+                                'questionText': question['questionController']
+                                    .text
+                                    .trim(),
+                                'options': [
+                                  question['optionAController'].text.trim(),
+                                  question['optionBController'].text.trim(),
+                                  question['optionCController'].text.trim(),
+                                  question['optionDController'].text.trim(),
+                                ],
+                                'correctAnswer': correctAnswerText,
+                              };
+                            })
+                            .toList();
+                        //Create as draft
+                        await QuizService().createQuiz(
+                          title: titleController.text.trim(),
+                          category: selectedCategory!,
+                          questions: questionsData,
+                          isPublished: false,
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Draft saved')),
+                        );
+                        Navigator.pop(context);
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey.shade300,
                         foregroundColor: Colors.white,
@@ -478,7 +523,6 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-
                       child: const Text('Save as Draft'),
                     ),
                   ),
@@ -504,7 +548,10 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                             );
                             return;
                           }
-                          //CREATE
+                          //reads all question form inputs
+                          //determines correct answers
+                          //formats quiz data
+                          //converts it into Firestore-ready structure
                           List<Map<String, dynamic>>
                           questionsData = questions.map((question) {
                             String correctAnswerText = '';
@@ -540,7 +587,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                             };
                           }).toList();
 
-                          //CREATE
+                          //save the quiz to the backend
                           if (widget.quizId == null) {
                             await QuizService().createQuiz(
                               title: titleController.text.trim(),
@@ -549,13 +596,14 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                               isPublished: true,
                             );
                           }
-                          //UPDATE
+                          //function for updating
                           else {
                             await QuizService().updateQuiz(
                               quizId: widget.quizId!,
                               updatedTitle: titleController.text.trim(),
                               updatedCategory: selectedCategory!,
                               updatedQuestions: questionsData,
+                              isPublished: true,
                             );
                           }
                           Navigator.pop(context);

@@ -91,23 +91,26 @@ class _MyLoginPageState extends State<MyLoginPage> {
           );
       // Get logged in user
       final user = userCredential.user;
+      await FirebaseFirestore.instance.collection('users').doc(user?.uid).set({
+        'isOnline': true,
+        'lastActive': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
       // Create Firestore document if missing
       if (user != null) {
         final userDoc = FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid);
         final snapshot = await userDoc.get();
-
         // the rare chance that if user exists in Authentication
         // but NOT in Firestore database for some reason, we create a new document for them in Firestore with default values
         if (!snapshot.exists) {
           await userDoc.set({
             'uid': user.uid,
             'email': user.email,
-            'username': user.email?.split('@')[0] ?? 'User',
+            'username': user.displayName ?? 'User',
             'role': 'user',
             'totalScore': 0,
-            'favoriteCategory': '',
+            'selectedCategory': '',
             'quizzesCompleted': 0,
             'joinedAt': Timestamp.now(),
             'isOnline': true,
@@ -117,7 +120,6 @@ class _MyLoginPageState extends State<MyLoginPage> {
           await userDoc.update({'isOnline': true});
         }
       }
-
       //if login is successful, show success message and navigate back to home page
       if (!context.mounted) return;
       //Close login page
@@ -211,6 +213,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                     ),
                   ),
                   const SizedBox(height: 26),
+
                   //Add a red asterick next to the email and password text fields to indicate that they are required fields
                   Row(
                     children: const [
@@ -242,6 +245,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
+
                   Row(
                     children: const [
                       Text(
@@ -319,6 +323,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                     ],
                   ),
                   const SizedBox(height: 26),
+
                   SizedBox(
                     width: double.infinity,
                     height: 49,
@@ -351,6 +356,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
+
                   SizedBox(
                     width: double.infinity,
                     height: 49,
@@ -392,6 +398,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                   ),
                   // Add a or continue with Google Sign-In option line before the Google Sign-In button
                   const SizedBox(height: 16),
+
                   Row(
                     children: const [
                       Expanded(
@@ -413,6 +420,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
+
                   SizedBox(
                     width: double.infinity,
                     height: 49,
@@ -422,7 +430,6 @@ class _MyLoginPageState extends State<MyLoginPage> {
                         //Check if sign-in was successful
                         if (userCredential != null) {
                           final user = userCredential.user;
-
                           //Check if user document exists in Firestore, if not, create a new document with default values,
                           //this is for users who sign in with Google for the first time,
                           //since they dont have a document in Firestore yet
@@ -430,9 +437,8 @@ class _MyLoginPageState extends State<MyLoginPage> {
                             final userDoc = FirebaseFirestore.instance
                                 .collection('users')
                                 .doc(user.uid);
-
                             final snapshot = await userDoc.get();
-
+                            //if user does not exist in Firestore yet
                             if (!snapshot.exists) {
                               await userDoc.set({
                                 'uid': user.uid,
@@ -440,9 +446,18 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                 'username': user.displayName ?? 'User',
                                 'role': 'user',
                                 'totalScore': 0,
-                                'favoriteCategory': '',
+                                'selectedCategory': '',
                                 'quizzesCompleted': 0,
                                 'joinedAt': Timestamp.now(),
+                                //ACTIVE USER TRACKING
+                                'isOnline': true,
+                                'lastActive': FieldValue.serverTimestamp(),
+                              });
+                            } else {
+                              //update existing user's online status
+                              await userDoc.update({
+                                'isOnline': true,
+                                'lastActive': FieldValue.serverTimestamp(),
                               });
                             }
                           }

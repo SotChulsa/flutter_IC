@@ -22,7 +22,7 @@ class AdminPage extends StatelessWidget {
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color.fromARGB(255, 46, 255, 23),
+                      Color.fromARGB(255, 57, 255, 35),
                       Color.fromARGB(255, 36, 195, 18),
                     ],
                     stops: [0.0, 0.5],
@@ -47,11 +47,8 @@ class AdminPage extends StatelessWidget {
                           ),
                           SizedBox(height: 6),
                           Text(
-                            'Last Login: May 21, 2026 10:30 AM',
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 0, 0, 0),
-                              fontSize: 14,
-                            ),
+                            'Dashboard Overview',
+                            style: TextStyle(color: Colors.black, fontSize: 14),
                           ),
                         ],
                       ),
@@ -59,15 +56,15 @@ class AdminPage extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 24),
-              //admin only stats
+
+              // ADMIN STATS
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('users')
                     .snapshots(),
                 builder: (context, userSnapshot) {
-                  //loading buffer
+                  // loading
                   if (userSnapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -77,13 +74,13 @@ class AdminPage extends StatelessWidget {
                   }
                   // users data
                   final users = userSnapshot.data?.docs ?? [];
+                  // total users
                   final totalUsers = users.length;
-                  //get active users
-                  final activeUsers = users.where((user) {
-                    final data = user.data() as Map<String, dynamic>;
+                  // active users
+                  final activeUsers = users.where((userDoc) {
+                    final data = userDoc.data() as Map<String, dynamic>;
                     return data['isOnline'] == true;
                   }).length;
-                  //function to get data from firestone
                   return StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('quizzes')
@@ -94,21 +91,23 @@ class AdminPage extends StatelessWidget {
                           ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      //error
+                      // error
                       if (quizSnapshot.hasError) {
                         return Center(
                           child: Text(quizSnapshot.error.toString()),
                         );
                       }
-                      //quiz data
+                      // quiz data
                       final quizzes = quizSnapshot.data?.docs ?? [];
-                      //total quizzes
+                      // total quizzes
                       final totalQuizzes = quizzes.length;
-                      //total questions
+                      // total questions
                       int totalQuestions = 0;
                       for (var quiz in quizzes) {
                         final data = quiz.data() as Map<String, dynamic>;
+
                         final questions = data['questions'] as List? ?? [];
+
                         totalQuestions += questions.length;
                       }
                       return GridView.count(
@@ -124,19 +123,16 @@ class AdminPage extends StatelessWidget {
                             value: totalUsers.toString(),
                             icon: Icons.people_alt_rounded,
                           ),
-
                           AdminStatCard(
                             title: 'Total Quizzes',
                             value: totalQuizzes.toString(),
                             icon: Icons.quiz_rounded,
                           ),
-
                           AdminStatCard(
                             title: 'Total Questions',
                             value: totalQuestions.toString(),
                             icon: Icons.menu_book_rounded,
                           ),
-
                           AdminStatCard(
                             title: 'Active Users',
                             value: activeUsers.toString(),
@@ -150,10 +146,11 @@ class AdminPage extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
+              // QUIZ MANAGEMENT
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 255, 255),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
@@ -175,7 +172,6 @@ class AdminPage extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         Container(
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
@@ -183,8 +179,6 @@ class AdminPage extends StatelessWidget {
                                 Color.fromARGB(255, 27, 145, 13),
                                 Color.fromARGB(255, 36, 195, 18),
                               ],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
                             ),
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -201,23 +195,14 @@ class AdminPage extends StatelessWidget {
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 14,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
                             ),
-                            child: const Text(
-                              'Create Quiz',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                            child: const Text('Create Quiz'),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
+
                     const QuizManagementCard(),
                   ],
                 ),
@@ -230,24 +215,20 @@ class AdminPage extends StatelessWidget {
   }
 }
 
-// Reusable card widget for admin statistics
-// Example:
-// Total Users
-// Total Quizzes
-// Active Users
+//Reusable card widget for admin statistics
+//Example:
+//Total Users
+//Total Quizzes
+//Active Users
 class AdminStatCard extends StatelessWidget {
   // card title text
   final String title;
-
   // card main value text
   final String value;
-
   // icon shown at top of card
   final IconData icon;
-
   const AdminStatCard({
     super.key,
-
     // required values passed when creating card
     required this.title,
     required this.value,
@@ -274,14 +255,11 @@ class AdminStatCard extends StatelessWidget {
           ),
         ],
       ),
-
       child: Column(
         //align children to left side
         crossAxisAlignment: CrossAxisAlignment.start,
-
         //push top and bottom content apart
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
         children: [
           //icon container
           Container(
@@ -296,7 +274,6 @@ class AdminStatCard extends StatelessWidget {
             //display passed icon
             child: Icon(icon, color: const Color.fromARGB(255, 0, 0, 0)),
           ),
-
           //value & title
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,6 +334,7 @@ class QuizManagementCard extends StatelessWidget {
           itemBuilder: (context, index) {
             //get current quiz document
             final quiz = quizzes[index];
+            final isPublished = quiz['isPublished'] ?? false;
             //each quiz card container
             return Container(
               margin: const EdgeInsets.only(bottom: 18),
@@ -377,14 +355,38 @@ class QuizManagementCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   //quiz title
-                  Text(
-                    //display title from Firestore
-                    //fallback if title missing
-                    quiz['title'] ?? 'Untitled Quiz',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          quiz['title'] ?? 'Untitled Quiz',
+
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isPublished ? Colors.green : Colors.orange,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          isPublished ? 'Published' : 'Draft',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
 
@@ -417,7 +419,6 @@ class QuizManagementCard extends StatelessWidget {
                               ),
                             );
                           },
-
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
@@ -425,7 +426,6 @@ class QuizManagementCard extends StatelessWidget {
                           child: const Text('Edit'),
                         ),
                       ),
-
                       const SizedBox(width: 12),
 
                       //delete button

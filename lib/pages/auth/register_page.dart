@@ -37,7 +37,6 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-
   //Check if registered user password and confirm password match, if not show error message, if they match, create user with email and password,
   //if registration is successful, set default user data in Firestore for new user,
   //if registration fails, show error message
@@ -49,7 +48,6 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
       ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
     }
-
     //Try to create user with email and password
     try {
       UserCredential userCredential = await FirebaseAuth.instance
@@ -57,35 +55,37 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
           );
-
-      //Set default user data in Firestore for new user
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set({
-            'email': _emailController.text.trim(),
-            'username': _usernameController.text.trim(),
-            'role': 'user',
-          });
-
       String uid = userCredential.user!.uid;
-
-      //Set default user data in Firestore for new user with additional fields for quiz app
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        //basic user profile
         'username': _usernameController.text.trim(),
         'email': _emailController.text.trim(),
+        //user profile
+        'firstName': '',
+        'lastName': '',
+        'fullName': _usernameController.text.trim(),
+        'bio': '',
+        'profileImage': '',
+        //user stats
         'totalScore': 0,
-        'favoriteCategory': '',
+        'totalCorrectAnswers': 0,
+        'totalQuestionsAnswered': 0,
+        'lastQuizCompletedDate': null,
+        'dailyGoal': 3,
         'quizzesCompleted': 0,
+        'accuracyRate': 0,
+        //account preferences
+        'favoriteCategory': '',
+        'selectedCategories': [],
+        'notifications': true,
+        //system check if user is online, what date they created the account and their role
         'joinedAt': Timestamp.now(),
         'role': 'user',
         'isOnline': true,
       });
-
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Registration Successful')));
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
@@ -133,6 +133,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 26),
+
                   Row(
                     children: [
                       Text(
@@ -162,6 +163,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
+
                   Row(
                     children: [
                       Text(
@@ -191,6 +193,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
+
                   Row(
                     children: [
                       Text(
@@ -221,6 +224,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                     obscureText: true,
                   ),
                   const SizedBox(height: 24),
+
                   Row(
                     children: [
                       Text(
@@ -251,6 +255,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                     obscureText: true,
                   ),
                   const SizedBox(height: 12),
+
                   // I agree to the terms and conditions checkbox placed closer
                   Row(
                     children: [
@@ -304,6 +309,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
+
                   SizedBox(
                     width: double.infinity,
                     height: 49,

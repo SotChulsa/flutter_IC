@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class ForgotPassword extends StatefulWidget {
   static String id = 'forgot-password';
-
   const ForgotPassword({super.key});
 
   @override
@@ -16,7 +15,6 @@ class ForgotPassword extends StatefulWidget {
 class _ForgotPasswordState extends State<ForgotPassword> {
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
   //Dispose email controller when the widget is disposed to free up resources
   @override
   void dispose() {
