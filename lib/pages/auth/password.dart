@@ -75,7 +75,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Image.asset('images/logo.jpeg', width: 200, height: 200),
+                    Image.asset(
+                      'assets/images/logo.jpeg',
+                      width: 200,
+                      height: 200,
+                    ),
                     const SizedBox(height: 6),
                     const Text(
                       'Password Reset',

@@ -201,7 +201,11 @@ class _MyLoginPageState extends State<MyLoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset('images/logo.jpeg', width: 200, height: 200),
+                  Image.asset(
+                    'assets/images/logo.jpeg',
+                    width: 200,
+                    height: 200,
+                  ),
                   const SizedBox(height: 6),
                   const Text(
                     'Login',
@@ -226,7 +230,9 @@ class _MyLoginPageState extends State<MyLoginPage> {
                       ),
                       SizedBox(width: 4),
                       Image(
-                        image: AssetImage('images/required_asterick.png'),
+                        image: AssetImage(
+                          'assets/images/required_asterick.png',
+                        ),
                         width: 8,
                         height: 8,
                       ),
@@ -257,7 +263,9 @@ class _MyLoginPageState extends State<MyLoginPage> {
                       ),
                       SizedBox(width: 4),
                       Image(
-                        image: AssetImage('images/required_asterick.png'),
+                        image: AssetImage(
+                          'assets/images/required_asterick.png',
+                        ),
                         width: 8,
                         height: 8,
                       ),
@@ -481,7 +489,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                         ),
                       ),
                       child: const Image(
-                        image: AssetImage('images/google.png'),
+                        image: AssetImage('assets/images/google.png'),
                         width: 24,
                         height: 24,
                       ),

@@ -121,7 +121,11 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset('images/logo.jpeg', width: 200, height: 200),
+                  Image.asset(
+                    'assets/images/logo.jpeg',
+                    width: 200,
+                    height: 200,
+                  ),
                   const SizedBox(height: 6),
                   const Text(
                     'Register',
@@ -145,7 +149,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                       ),
                       SizedBox(width: 4),
                       Image.asset(
-                        'images/required_asterick.png',
+                        'assets/images/required_asterick.png',
                         width: 8,
                         height: 8,
                       ),
@@ -175,7 +179,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                       ),
                       SizedBox(width: 4),
                       Image.asset(
-                        'images/required_asterick.png',
+                        'assets/images/required_asterick.png',
                         width: 8,
                         height: 8,
                       ),
@@ -205,7 +209,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                       ),
                       SizedBox(width: 4),
                       Image.asset(
-                        'images/required_asterick.png',
+                        'assets/images/required_asterick.png',
                         width: 8,
                         height: 8,
                       ),
@@ -236,7 +240,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                       ),
                       SizedBox(width: 4),
                       Image.asset(
-                        'images/required_asterick.png',
+                        'assets/images/required_asterick.png',
                         width: 8,
                         height: 8,
                       ),

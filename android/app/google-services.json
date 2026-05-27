@@ -12,7 +12,20 @@
           "package_name": "com.example.fluttergame_ic"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "108723258802-60b0rk7b4t7tbe69kr6a9f02moe47hbb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fluttergame_ic",
+            "certificate_hash": "985e2007cec8ab233d0d4a61f244db18d1d03de2"
+          }
+        },
+        {
+          "client_id": "108723258802-q60e6ea5a0r74k64i9pcjgair4qc8lqv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCvP1c85rAThfv6p4Jo7lZapzKjGVwsvks"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "108723258802-hqieffurfoamcilkajackt5uf66vpfrl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "108723258802-r77kn26v01klodt0ldkimhclh3uoh89h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.fluttergameIc"
+              }
+            }
+          ]
         }
       }
     }

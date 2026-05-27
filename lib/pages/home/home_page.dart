@@ -124,7 +124,7 @@ class _HomePageState extends State<HomePage> {
                         },
                         icon: ClipOval(
                           child: Image.asset(
-                            'images/default_profile.png',
+                            'assets/images/default_profile.png',
                             width: 55,
                             height: 55,
                             fit: BoxFit.cover,

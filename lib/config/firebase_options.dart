@@ -3,10 +3,17 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
-// ignore: unused_import
-import 'firebase_options_dev.dart'
-    if (dart.library.io) 'firebase_options_prod.dart';
 
+/// Default [FirebaseOptions] for use with your Firebase apps.
+///
+/// Example:
+/// ```dart
+/// import 'firebase_options.dart';
+/// // ...
+/// await Firebase.initializeApp(
+///   options: DefaultFirebaseOptions.currentPlatform,
+/// );
+/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -56,6 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '108723258802',
     projectId: 'score-cb1bd',
     storageBucket: 'score-cb1bd.firebasestorage.app',
+    iosClientId: '108723258802-r77kn26v01klodt0ldkimhclh3uoh89h.apps.googleusercontent.com',
     iosBundleId: 'com.example.fluttergameIc',
   );
 
@@ -65,6 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '108723258802',
     projectId: 'score-cb1bd',
     storageBucket: 'score-cb1bd.firebasestorage.app',
+    iosClientId: '108723258802-r77kn26v01klodt0ldkimhclh3uoh89h.apps.googleusercontent.com',
     iosBundleId: 'com.example.fluttergameIc',
   );
 
@@ -76,4 +85,5 @@ class DefaultFirebaseOptions {
     authDomain: 'score-cb1bd.firebaseapp.com',
     storageBucket: 'score-cb1bd.firebasestorage.app',
   );
+
 }
