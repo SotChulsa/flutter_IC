@@ -1,6 +1,8 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttergame_ic/pages/auth/login_page.dart';
 import 'package:fluttergame_ic/pages/quiz/create_quiz.dart';
 
 class AdminPage extends StatelessWidget {
@@ -9,6 +11,22 @@ class AdminPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const MyLoginPage()),
+                (route) => false,
+              );
+            },
+          ),
+        ],
+      ),
       backgroundColor: const Color.fromARGB(255, 245, 251, 247),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -16,7 +34,7 @@ class AdminPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // HEADER
+              //Header
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: const BoxDecoration(
@@ -179,6 +197,8 @@ class AdminPage extends StatelessWidget {
                                 Color.fromARGB(255, 27, 145, 13),
                                 Color.fromARGB(255, 36, 195, 18),
                               ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
                             ),
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -453,50 +473,6 @@ class QuizManagementCard extends StatelessWidget {
           },
         );
       },
-    );
-  }
-}
-
-//category tag
-class CategoryTag extends StatelessWidget {
-  const CategoryTag({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.green.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Text(
-        'Mathematics',
-        style: TextStyle(
-          color: Colors.green,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-//publish tag
-class PublishedTag extends StatelessWidget {
-  const PublishedTag({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.green.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Text(
-        'Published',
-        style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
-      ),
     );
   }
 }

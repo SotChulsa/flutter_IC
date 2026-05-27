@@ -73,7 +73,7 @@ class _ResultPageState extends State<ResultPage> {
                         label: 'Quizzes Completed',
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 24),
 
                     //Accuracy
                     Expanded(
@@ -294,108 +294,112 @@ class _ResultPageState extends State<ResultPage> {
           width: 2.5,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          //Top
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 147, 228, 159),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  category,
-                  style: const TextStyle(
-                    color: Color.fromARGB(255, 70, 177, 86),
+      child: SizedBox(
+        height: 140,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            //Top
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
                   ),
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$score/$totalQuestions',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 147, 228, 159),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  const Text(
-                    'Score',
-                    style: TextStyle(fontSize: 11, color: Colors.black54),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
-          Text(
-            date,
-            style: const TextStyle(fontSize: 11, color: Colors.black54),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Accuracy',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-              Text(
-                '${accuracy.toStringAsFixed(0)}%',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          LinearProgressIndicator(
-            value: accuracy / 100,
-            minHeight: 7,
-            borderRadius: BorderRadius.circular(20),
-            backgroundColor: Colors.green.shade100,
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-          ),
-          const SizedBox(height: 12),
-
-          //When click view detail, the navigator will push to the complete quiz page that matches the parameter in the builder below
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => QuizResultPage(
-                      score: score,
-                      totalQuestions: totalQuestions,
-                      accuracy: accuracy,
-                      category: category,
-                      quizTitle: 'Quiz',
-                      duration: duration,
-                      answers: answers,
-                      quizId: quizId,
+                  child: Text(
+                    category,
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 70, 177, 86),
                     ),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 209, 251, 216),
-                foregroundColor: const Color.fromARGB(255, 70, 177, 86),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
                 ),
-              ),
-              child: const Text('View Details'),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '$score/$totalQuestions',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const Text(
+                      'Score',
+                      style: TextStyle(fontSize: 11, color: Colors.black54),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+
+            Text(
+              date,
+              style: const TextStyle(fontSize: 11, color: Colors.black54),
+            ),
+            const SizedBox(height: 8),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Accuracy',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  '${accuracy.toStringAsFixed(0)}%',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            LinearProgressIndicator(
+              value: accuracy / 100,
+              minHeight: 7,
+              borderRadius: BorderRadius.circular(20),
+              backgroundColor: Colors.green.shade100,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+            ),
+            const SizedBox(height: 12),
+
+            //When click view detail, the navigator will push to the complete quiz page that matches the parameter in the builder below
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => QuizResultPage(
+                        score: score,
+                        totalQuestions: totalQuestions,
+                        accuracy: accuracy,
+                        category: category,
+                        quizTitle: 'Quiz',
+                        duration: duration,
+                        answers: answers,
+                        quizId: quizId,
+                      ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 209, 251, 216),
+                  foregroundColor: const Color.fromARGB(255, 70, 177, 86),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('View Details'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

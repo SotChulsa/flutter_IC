@@ -58,7 +58,7 @@ class QuizResultPage extends StatelessWidget {
                       Color(0xFF2D7DFF),
                     ],
                     begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    end: Alignment.topRight,
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -212,7 +212,7 @@ class QuizResultPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 10),
 
-                              Row(
+                              Wrap(
                                 children: [
                                   const Text(
                                     'Your Answer: ',
@@ -231,9 +231,11 @@ class QuizResultPage extends StatelessWidget {
                                   ),
                                 ],
                               ),
+
                               if (!isCorrect) ...[
                                 const SizedBox(height: 6),
-                                Row(
+
+                                Wrap(
                                   children: [
                                     const Text(
                                       'Correct Answer: ',

@@ -33,7 +33,6 @@ class QuizService {
       'title': updatedTitle,
       'category': updatedCategory,
       'questions': updatedQuestions,
-
       'isPublished': isPublished,
       'isDraft': !isPublished,
     });

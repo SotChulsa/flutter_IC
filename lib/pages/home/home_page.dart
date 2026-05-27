@@ -178,7 +178,12 @@ class _HomePageState extends State<HomePage> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(24),
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF66BB6A), Color(0xFF42A5F5)],
+                                colors: [
+                                  Color.fromARGB(255, 78, 180, 93),
+                                  Color.fromARGB(255, 101, 188, 114),
+                                  Color.fromARGB(255, 147, 228, 159),
+                                ],
+                                stops: [0.0, 2.0, 0.6],
                               ),
                             ),
                             child: Column(
@@ -189,14 +194,16 @@ class _HomePageState extends State<HomePage> {
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    color: Color.fromARGB(255, 0, 0, 0),
                                   ),
                                 ),
                                 const SizedBox(height: 14),
 
                                 const Text(
                                   'Last played',
-                                  style: TextStyle(color: Colors.white70),
+                                  style: TextStyle(
+                                    color: Color.fromARGB(179, 0, 0, 0),
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
 
@@ -204,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                                   latestQuiz['title'],
                                   style: const TextStyle(
                                     fontSize: 20,
-                                    color: Colors.white,
+                                    color: Color.fromARGB(255, 0, 0, 0),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -214,7 +221,7 @@ class _HomePageState extends State<HomePage> {
                                   latestQuiz['category'],
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.white70,
+                                    color: Color.fromARGB(179, 0, 0, 0),
                                   ),
                                 ),
                                 const SizedBox(height: 14),
@@ -230,7 +237,12 @@ class _HomePageState extends State<HomePage> {
                                           backgroundColor: Colors.white30,
                                           valueColor:
                                               const AlwaysStoppedAnimation(
-                                                Colors.white,
+                                                Color.fromARGB(
+                                                  255,
+                                                  255,
+                                                  255,
+                                                  255,
+                                                ),
                                               ),
                                         ),
                                       ),
@@ -239,8 +251,8 @@ class _HomePageState extends State<HomePage> {
                                     const SizedBox(width: 14),
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white,
-                                        foregroundColor: Colors.green,
+                                        backgroundColor: Colors.green,
+                                        foregroundColor: Colors.white,
                                       ),
                                       onPressed: () {
                                         Navigator.push(
@@ -258,7 +270,9 @@ class _HomePageState extends State<HomePage> {
                                 const SizedBox(height: 10),
                                 Text(
                                   '$completedQuestions / $totalQuestions Questions Completed',
-                                  style: const TextStyle(color: Colors.white),
+                                  style: const TextStyle(
+                                    color: Color.fromARGB(255, 0, 0, 0),
+                                  ),
                                 ),
                               ],
                             ),
@@ -320,7 +334,7 @@ class _HomePageState extends State<HomePage> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(22),
-                              border: Border.all(color: Colors.green.shade300),
+                              border: Border.all(color: Colors.green.shade600),
                             ),
                             child: Row(
                               children: [
@@ -328,12 +342,20 @@ class _HomePageState extends State<HomePage> {
                                 Container(
                                   padding: const EdgeInsets.all(14),
                                   decoration: BoxDecoration(
-                                    color: Colors.green.shade100,
+                                    color: const Color.fromARGB(
+                                      255,
+                                      255,
+                                      255,
+                                      255,
+                                    ),
                                     borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                    ),
                                   ),
                                   child: const Icon(
                                     Icons.menu_book,
-                                    color: Colors.green,
+                                    color: Color.fromARGB(255, 0, 0, 0),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -365,8 +387,18 @@ class _HomePageState extends State<HomePage> {
                                 //start quiz button
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
+                                    backgroundColor: const Color.fromARGB(
+                                      255,
+                                      97,
+                                      241,
+                                      105,
+                                    ),
+                                    foregroundColor: const Color.fromARGB(
+                                      255,
+                                      0,
+                                      0,
+                                      0,
+                                    ),
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 18,
                                       vertical: 12,

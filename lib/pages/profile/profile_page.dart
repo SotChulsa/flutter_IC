@@ -519,52 +519,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 24),
 
-                  //Email notification
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 224, 255, 229),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: const Color.fromARGB(255, 97, 241, 105),
-                        width: 2.5,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Email Notification',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(height: 4),
-
-                            Text(
-                              'Receive quiz reminders and achievements',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Color.fromARGB(255, 0, 0, 0),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Switch(
-                          value: emailNotification,
-                          onChanged: (value) {
-                            setState(() {
-                              //Save notification setting to Firestore
-                              emailNotification = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-
                   //Save or cancel changes button
                   Row(
                     children: [
@@ -657,7 +611,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           if (!context.mounted) return;
                           Navigator.pushNamedAndRemoveUntil(
                             context,
-                            '/login',
+                            '/HomePage',
                             (route) => false,
                           );
                         } catch (e) {
