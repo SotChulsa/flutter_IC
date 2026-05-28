@@ -1,23 +1,32 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../admin/admin_page.dart';
 import '../home/home_page.dart';
 
 class AuthService {
-  Future<void> handleUserLogin(User user) async {
-    final userDoc = FirebaseFirestore.instance
+  Future<void> handleUserLogin(BuildContext context, User user) async {
+    final doc = await FirebaseFirestore.instance
         .collection('users')
-        .doc(user.uid);
-    final snapshot = await userDoc.get();
-    if (!snapshot.exists) {
-      await userDoc.set({
-        'uid': user.uid,
-        'email': user.email,
-        'role': 'user',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+        .doc(user.uid)
+        .get();
+
+    final role = doc.data()?['role'] ?? 'user';
+
+    if (role == 'admin') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const AdminPage()),
+        (route) => false,
+      );
+    } else {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomePage()),
+        (route) => false,
+      );
     }
   }
 }
@@ -27,56 +36,57 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //Listen to auth state changes
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, authSnapshot) {
-        // Loading
+        //Loading
         if (authSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
+
         //Not logged in
         if (!authSnapshot.hasData) {
           return const HomePage();
         }
-        //Logged in user
+        //Current logged in user
         final user = authSnapshot.data!;
-        //Check Firestore role
-        return FutureBuilder<DocumentSnapshot>(
-          future: FirebaseFirestore.instance
+        //Listen to Firestore user document
+        return StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
-              .get(),
+              .snapshots(),
           builder: (context, userSnapshot) {
-            //loading
+            //Loading Firestore user document
             if (userSnapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            //error
+
+            //Error
             if (userSnapshot.hasError) {
               return const Scaffold(
                 body: Center(child: Text('Error loading user')),
               );
             }
-            //no user
+
+            //User document not created yet
             if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
               return const Scaffold(
-                body: Center(child: Text('User document not found')),
+                body: Center(child: CircularProgressIndicator()),
               );
             }
-            //fetch user data
+            //User data
             final userData = userSnapshot.data!.data() as Map<String, dynamic>;
-            //get roles
-            final role = userData['role'].toString().toLowerCase();
-            //for admin
+            final role = (userData['role'] ?? 'user').toString().toLowerCase();
+            //Admin
             if (role == 'admin') {
               return const AdminPage();
             }
-            //for normal users
+            //Normal user
             return const HomePage();
           },
         );

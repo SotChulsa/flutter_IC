@@ -12,6 +12,8 @@ class AdminPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -27,7 +29,7 @@ class AdminPage extends StatelessWidget {
           ),
         ],
       ),
-      backgroundColor: const Color.fromARGB(255, 245, 251, 247),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -76,25 +78,25 @@ class AdminPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // ADMIN STATS
+              //Admin stats
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('users')
                     .snapshots(),
                 builder: (context, userSnapshot) {
-                  // loading
+                  //Loading
                   if (userSnapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  // error
+                  //Error
                   if (userSnapshot.hasError) {
                     return Center(child: Text(userSnapshot.error.toString()));
                   }
-                  // users data
+                  //Users data
                   final users = userSnapshot.data?.docs ?? [];
-                  // total users
+                  //Total users
                   final totalUsers = users.length;
-                  // active users
+                  //Active users
                   final activeUsers = users.where((userDoc) {
                     final data = userDoc.data() as Map<String, dynamic>;
                     return data['isOnline'] == true;
@@ -104,28 +106,26 @@ class AdminPage extends StatelessWidget {
                         .collection('quizzes')
                         .snapshots(),
                     builder: (context, quizSnapshot) {
-                      // loading
+                      //Loading
                       if (quizSnapshot.connectionState ==
                           ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      // error
+                      //Error
                       if (quizSnapshot.hasError) {
                         return Center(
                           child: Text(quizSnapshot.error.toString()),
                         );
                       }
-                      // quiz data
+                      //Quiz data
                       final quizzes = quizSnapshot.data?.docs ?? [];
-                      // total quizzes
+                      //Total quizzes
                       final totalQuizzes = quizzes.length;
-                      // total questions
+                      //Total questions
                       int totalQuestions = 0;
                       for (var quiz in quizzes) {
                         final data = quiz.data() as Map<String, dynamic>;
-
                         final questions = data['questions'] as List? ?? [];
-
                         totalQuestions += questions.length;
                       }
                       return GridView.count(
@@ -136,25 +136,61 @@ class AdminPage extends StatelessWidget {
                         crossAxisSpacing: 16,
                         childAspectRatio: 1.0,
                         children: [
-                          AdminStatCard(
-                            title: 'Total Users',
-                            value: totalUsers.toString(),
-                            icon: Icons.people_alt_rounded,
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 57, 255, 35),
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: AdminStatCard(
+                              title: 'Total Users',
+                              value: totalUsers.toString(),
+                              icon: Icons.people_alt_rounded,
+                            ),
                           ),
-                          AdminStatCard(
-                            title: 'Total Quizzes',
-                            value: totalQuizzes.toString(),
-                            icon: Icons.quiz_rounded,
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 57, 255, 35),
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: AdminStatCard(
+                              title: 'Total Quizzes',
+                              value: totalQuizzes.toString(),
+                              icon: Icons.quiz_rounded,
+                            ),
                           ),
-                          AdminStatCard(
-                            title: 'Total Questions',
-                            value: totalQuestions.toString(),
-                            icon: Icons.menu_book_rounded,
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 57, 255, 35),
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: AdminStatCard(
+                              title: 'Total Questions',
+                              value: totalQuestions.toString(),
+                              icon: Icons.menu_book_rounded,
+                            ),
                           ),
-                          AdminStatCard(
-                            title: 'Active Users',
-                            value: activeUsers.toString(),
-                            icon: Icons.bar_chart_rounded,
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 57, 255, 35),
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: AdminStatCard(
+                              title: 'Active Users',
+                              value: activeUsers.toString(),
+                              icon: Icons.bar_chart_rounded,
+                            ),
                           ),
                         ],
                       );
@@ -164,7 +200,7 @@ class AdminPage extends StatelessWidget {
               ),
               const SizedBox(height: 25),
 
-              // QUIZ MANAGEMENT
+              //Quiz management
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -172,7 +208,7 @@ class AdminPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: const Color.fromARGB(255, 57, 255, 35),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -370,6 +406,10 @@ class QuizManagementCard extends StatelessWidget {
                     offset: const Offset(0, 4),
                   ),
                 ],
+                border: Border.all(
+                  color: const Color.fromARGB(255, 57, 255, 35),
+                  width: 1.5,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

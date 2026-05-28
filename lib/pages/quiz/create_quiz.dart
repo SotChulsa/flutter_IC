@@ -281,7 +281,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                             ),
                             child: Text(
                               questions.length >= 10
-                                  ? 'Limit Reached'
+                                  ? 'Max Limit'
                                   : '+ Add Question',
                             ),
                           ),

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttergame_ic/pages/auth/check_auth.dart';
 import 'package:fluttergame_ic/pages/auth/password.dart';
 import 'register_page.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -83,7 +84,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
   //PUT THE FUNCTION HERE
   Future<void> signIn() async {
     try {
-      // Login user
+      //Login user
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(
             email: _emailController.text.trim(),
@@ -91,6 +92,9 @@ class _MyLoginPageState extends State<MyLoginPage> {
           );
       // Get logged in user
       final user = userCredential.user;
+      if (user != null) {
+        await AuthService().handleUserLogin(context, user);
+      }
       await FirebaseFirestore.instance.collection('users').doc(user?.uid).set({
         'isOnline': true,
         'lastActive': FieldValue.serverTimestamp(),
@@ -137,35 +141,56 @@ class _MyLoginPageState extends State<MyLoginPage> {
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      // WEB LOGIN
+      UserCredential? userCredential;
+      //Webpage login
       if (kIsWeb) {
-        // Create Google provider
         GoogleAuthProvider googleProvider = GoogleAuthProvider();
-        // Open Google popup and login
-        return await FirebaseAuth.instance.signInWithPopup(googleProvider);
+        userCredential = await FirebaseAuth.instance.signInWithPopup(
+          googleProvider,
+        );
+      } else {
+        //Andriod/ios login
+        final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+
+        await googleSignIn.initialize(
+          serverClientId:
+              "108723258802-hqieffurfoamcilkajackt5uf66vpfrl.apps.googleusercontent.com",
+        );
+        //Open google-account picker
+        final GoogleSignInAccount googleUser = await googleSignIn
+            .authenticate();
+        //Get Google authentication tokens
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+        //Create Firebase credential
+        final credential = GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+        //Login to Firebase
+        userCredential = await FirebaseAuth.instance.signInWithCredential(
+          credential,
+        );
       }
-      // ANDROID / IOS LOGIN
-      final GoogleSignIn googleSignIn = GoogleSignIn.instance;
-      // Initialize Google Sign-In
-      await googleSignIn.initialize(
-        serverClientId:
-            "108723258802-hqieffurfoamcilkajackt5uf66vpfrl.apps.googleusercontent.com",
-      );
-      // Open Google account picker
-      final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
-      // Get Google authentication tokens
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-      // Create Firebase credential
-      final credential = GoogleAuthProvider.credential(
-        // Google ID token
-        idToken: googleAuth.idToken,
-      );
-      // Login to Firebase with credential
-      return await FirebaseAuth.instance.signInWithCredential(credential);
+      //User Document Creation
+      final user = userCredential.user;
+      if (user != null) {
+        final userDoc = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid);
+        final docSnapshot = await userDoc.get();
+        //Create document if first login
+        if (!docSnapshot.exists) {
+          await userDoc.set({
+            'uid': user.uid,
+            'name': user.displayName ?? '',
+            'email': user.email ?? '',
+            'photoUrl': user.photoURL ?? '',
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+      return userCredential;
     } catch (e) {
-      // Print error for debugging
       debugPrint("Google Sign-In error: $e");
-      // Return null if login fails
       return null;
     }
   }

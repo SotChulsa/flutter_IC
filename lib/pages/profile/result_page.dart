@@ -70,10 +70,10 @@ class _ResultPageState extends State<ResultPage> {
                       child: _buildStatCard(
                         icon: Icons.workspace_premium_outlined,
                         value: completedQuizzes.toString(),
-                        label: 'Quizzes Completed',
+                        label: 'Quizzes Done',
                       ),
                     ),
-                    const SizedBox(width: 24),
+                    const SizedBox(width: 12),
 
                     //Accuracy
                     Expanded(
@@ -211,7 +211,7 @@ class _ResultPageState extends State<ResultPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 0),
                   ],
                 ),
               ],

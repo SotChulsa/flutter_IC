@@ -1,9 +1,9 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print, deprecated_member_use
 
 import 'dart:convert';
-
-import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttergame_ic/pages/profile/result_page.dart';
 import 'dart:typed_data';
@@ -17,10 +17,10 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Uint8List? selectedImageBytes;
   final ImagePicker picker = ImagePicker();
   final currentUser = FirebaseAuth.instance.currentUser;
   bool isLoading = true;
+  Map<String, dynamic>? userData;
   //firebase data
   String fullName = '';
   String email = '';
@@ -127,12 +127,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> pickImage() async {
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    //compress the quality of the image to 20 bytes
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 20,
+    );
     if (image == null) return;
     //read images as bytes
     Uint8List imageBytes = await image.readAsBytes();
     //convert to base64
     String base64Image = base64Encode(imageBytes);
+    print(base64Image.length);
     //save to the database
     await FirebaseFirestore.instance
         .collection('users')
@@ -140,7 +145,6 @@ class _ProfilePageState extends State<ProfilePage> {
         .update({'profileImage': base64Image});
     //update profile ui to show the image
     setState(() {
-      selectedImageBytes = imageBytes;
       profileImage = base64Image;
     });
   }
@@ -186,15 +190,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         radius: 40,
                         backgroundColor: Colors.white,
                         backgroundImage:
-                            //Newly selected image
-                            selectedImageBytes != null
-                            ? MemoryImage(selectedImageBytes!)
                             //Saved firestore image
-                            : profileImage.isNotEmpty
+                            profileImage.isNotEmpty
                             ? MemoryImage(base64Decode(profileImage))
                             : null,
-                        child:
-                            selectedImageBytes == null && profileImage.isEmpty
+                        child: profileImage.isEmpty
                             ? const Icon(
                                 Icons.person_outline,
                                 size: 60,
@@ -242,12 +242,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 16),
 
-                  //john date
-                  const Row(
+                  // join date
+                  Row(
                     children: [
-                      Icon(Icons.calendar_month_outlined),
-                      SizedBox(width: 12),
-                      Text('Joined February 2026'),
+                      const Icon(Icons.calendar_month_outlined),
+                      const SizedBox(width: 12),
+                      Text(
+                        userData?['createdAt'] != null
+                            ? 'Joined ${DateFormat('MMMM yyyy').format((userData!['createdAt'] as Timestamp).toDate())}'
+                            : 'Joined recently',
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -565,24 +569,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: const Text('Save Changes'),
                         ),
                       ),
-                      const SizedBox(width: 12),
-
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            //Reset fields or navigate back
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[300],
-                            foregroundColor: Colors.black,
-                            minimumSize: const Size(0, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          child: const Text('Cancel'),
-                        ),
-                      ),
+                      const SizedBox(width: 0),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -593,9 +580,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: ElevatedButton.icon(
                       onPressed: () async {
                         try {
-                          //Get current user
                           final currentUser = FirebaseAuth.instance.currentUser;
-                          //update Firestore status
                           if (currentUser != null) {
                             await FirebaseFirestore.instance
                                 .collection('users')
@@ -605,15 +590,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                   'lastActive': FieldValue.serverTimestamp(),
                                 });
                           }
-                          //Logout from Firebase Auth
+                          //Logout
                           await FirebaseAuth.instance.signOut();
-                          //Navigate back to login
+                          //Close profile page
                           if (!context.mounted) return;
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            '/HomePage',
-                            (route) => false,
-                          );
+                          Navigator.pop(context);
                         } catch (e) {
                           print('Logout Error: $e');
                         }
